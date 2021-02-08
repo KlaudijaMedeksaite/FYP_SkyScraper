@@ -17,22 +17,26 @@ class FlightsSpider(scrapy.Spider):
         
         rowNum = 2
         #pageNo = 1
+        print("starting parse, rowNum: ", rowNum, "\n")
         
+
         while rowNum < 34:
             stats = open("flightStats.txt", "w+")
             stats.write("\n")
-
             status = ""
-            print("IM HEREEEEEEEEEEE!!!!!!!!!!!!!!!!!!!\n")
-            status = response.xpath('//*[@id="wrap-page"]/main/section[2]/div/div[2]/table/tbody/tr[{}]'.format(rowNum)).get()
+            
+            # scraping info using xpath - 
+            # this sometimes changes if the website changes
+            # last updated 08/02/2021 09:47
+            status = response.xpath('//*[@id="wrap-page"]/main/section[2]/div/div[1]/table/tbody/tr[{}]'.format(rowNum)).get()
             status = re.sub(r'<[^>]+>','',status)
-            #print(status.strip())
+            print(status.strip())
             stats.write(status.strip())
             stats.close()
             
+            # writing to txt file
             stats = open("flightStats.txt", "r")
             Lines = stats.readlines()
-            #print(Lines.strip())
             stats.close()
             
             
@@ -41,7 +45,6 @@ class FlightsSpider(scrapy.Spider):
             for line in Lines:
                 if  line.strip():
                     lineForm.append(line.strip())
-                    #print(lineForm[count])
                     count +=1
 
              
@@ -71,8 +74,10 @@ class FlightsSpider(scrapy.Spider):
                 if rowNum < 34:
                     write_file.write(',\n')
         
-        
-        linkNextPage = response.xpath('//*[@id="wrap-page"]/main/section[2]/div/div[2]/ul/li[8]/a/@href').get()
+        # scraping link to next page using xpath - 
+        # this sometimes changes if the website changes
+        # last updated 08/02/2021 09:58
+        linkNextPage = response.xpath('//*[@id="wrap-page"]/main/section[2]/div/div[1]/ul/li[8]/a/@href').get()
         linkNextPage = linkNextPage.strip()
         if linkNextPage.find('page-140') < 0:
             print("next page link: {}".format(linkNextPage))
