@@ -1,9 +1,9 @@
 
-FR468
+FR4760
 						
-						06:30
-						10:05
-						(EMA) Leicestershire, United Kingdom
-						(ALC) Alicante, Spain
-						Departure None - Arrival N
-						Landed
+						11:15
+						15:25
+						(CWL) Cardiff, United Kingdom
+						(TFS) Tenerife, Spain
+						Departure None - Arrival None
+						Scheduled
