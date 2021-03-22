@@ -42,3 +42,11 @@ cursor.execute("CREATE TABLE IF NOT EXISTS flight_info ("
 # "FOREIGN KEY(destination) REFERENCES airports(code))")
 
 cnxn.commit()  # this commits changes to the database
+cursor.execute("INSERT INTO flight_info ("
+               "flight_no, depart_time, arrive_time,"
+               "origin, destination, depart_terminal,"
+               "arrive_terminal, flight_status)"
+               "VALUES("
+               "'001', '00:00', '12:00', 'test_country', 'other_test_country',"
+               "'T0', 'T1', 'Test_status');")
+cnxn.commit()  # this commits changes to the database

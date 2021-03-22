@@ -1,9 +1,9 @@
 
-FR4760
+FR660
 						
-						11:15
-						15:25
-						(CWL) Cardiff, United Kingdom
-						(TFS) Tenerife, Spain
+						01:00
+						02:00
+						(BGY) Milan, Italy
+						(KUN) Kaunas, Lithuania
 						Departure None - Arrival None
-						Scheduled
+						In Air
