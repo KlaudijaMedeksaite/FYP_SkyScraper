@@ -1,9 +1,0 @@
-
-                        No.
-                        Departure
-                        Arrival
-                        Origin
-                        Destination
-                        Terminal
-                        Last Update Status
-                    

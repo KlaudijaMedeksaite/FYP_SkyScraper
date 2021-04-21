@@ -1,0 +1,8 @@
+**/build
+scrapinghub
+setup
+scrapy.cfg
+**/project.egg-info
+__pycache__
+*.json
+__init__

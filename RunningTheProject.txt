@@ -1,6 +1,0 @@
-To run Scraper: 
-step 1: run ryanair_flights.py (scrapy crawl flightStat)
-
-each flight info is then put into flightStats.txt
-
-from there it is printed to flightFiles.json
