@@ -10,10 +10,6 @@ config = {
     'user': 'root',
     'password': '12345',
     'host': '34.123.203.246',
-    # 'client_flags': [ClientFlag.SSL],
-    # 'ssl_ca': 'ssl/server-ca.pem',
-    # 'ssl_cert': 'ssl/client-cert.pem',
-    # 'ssl_key': 'ssl/client-key.pem'
 }
 
 
@@ -66,6 +62,26 @@ class FlightsSpider(scrapy.Spider):
                 print("f_no: ", flightNo, "dep: ",  departure, "arr: ", arrival, "origin:", origin,
                       "destination: ", destination, "terminals: ", terminal, "status: ",  lastUpdate)
 
+            # for airport creation
+            # origin
+            originAirportCity, originAirportCountry = origin.split(
+                ',', 1)
+            extra, originAirportCity = originAirportCity.split(
+                ')', 1)
+            originAirportCity = str(originAirportCity).strip()
+            originAirportCountry = str(originAirportCountry).strip()
+
+            # destination
+
+            destAirportCity, destAirportCountry = destination.split(
+                ',', 1)
+            extra, destAirportCity = destAirportCity.split(
+                ')', 1)
+            destAirportCity = str(destAirportCity).strip()
+            destAirportCountry = str(destAirportCountry).strip()
+            print("city: ", destAirportCity,
+                  " country: ", destAirportCountry)
+
             # fix origin and destination to conform as foreign key
             origin, extra = str(origin).split(')', 1)
             origin = str(origin).replace('(', '')
@@ -81,13 +97,28 @@ class FlightsSpider(scrapy.Spider):
             # put all vars into list, ready to go into db
             statList = [flightNo, departure, arrival, origin,
                         destination, terminalDep, terminalArr, lastUpdate]
+            airportListOR = [origin, originAirportCity, originAirportCountry]
+            airportListDES = [destination, destAirportCity, destAirportCountry]
             print(statList)
             rowNum += 1
 
             # for putting into db
-            cursor.execute("USE flightDB", "")
-            query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
-            cursor.execute(query, statList)
+
+            try:
+                cursor.execute("USE flightDB", "")
+                query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                cursor.execute(query, statList)
+            except:
+                print(Exception)
+                # Sometimes trying to add flight to db with a foreign key relying
+                # on airports db but its not in there, need to add it in this case
+                cursor.execute("USE flightDB", "")
+                query = "REPLACE INTO airports (code, city, country) VALUES (%s, %s, %s)"
+                cursor.execute(query, airportListOR)
+                cursor.execute(query, airportListDES)
+
+                query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                cursor.execute(query, statList)
 
         # scraping link to next page using xpath -
         # this sometimes changes if the website changes
@@ -98,7 +129,7 @@ class FlightsSpider(scrapy.Spider):
         if linkNextPage.find('page-140') < 0:
             yield Request(linkNextPage, callback=self.parse)
 
-        cnxn.commit()  # this commits changes to the database
+        # cnxn.commit()  # this commits changes to the database
 
 # https://ryanair.flight-status.info/page-112
 
