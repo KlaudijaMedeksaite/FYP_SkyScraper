@@ -1,5 +1,4 @@
 **/build
-scrapinghub
 setup
 scrapy.cfg
 **/project.egg-info
