@@ -79,8 +79,7 @@ class FlightsSpider(scrapy.Spider):
                 ')', 1)
             destAirportCity = str(destAirportCity).strip()
             destAirportCountry = str(destAirportCountry).strip()
-            print("city: ", destAirportCity,
-                  " country: ", destAirportCountry)
+            #print("city: ", destAirportCity," country: ", destAirportCountry)
 
             # fix origin and destination to conform as foreign key
             origin, extra = str(origin).split(')', 1)
@@ -112,13 +111,30 @@ class FlightsSpider(scrapy.Spider):
                 print(Exception)
                 # Sometimes trying to add flight to db with a foreign key relying
                 # on airports db but its not in there, need to add it in this case
-                cursor.execute("USE flightDB", "")
-                query = "REPLACE INTO airports (code, city, country) VALUES (%s, %s, %s)"
-                cursor.execute(query, airportListOR)
-                cursor.execute(query, airportListDES)
+                try:
+                    print("Trying to update airport table with new origin airport")
+                    cursor.execute("USE flightDB", "")
+                    query = "REPLACE INTO airports (code, city, country) VALUES (%s, %s, %s)"
+                    cursor.execute(query, airportListOR)
+                    print("executed ok")
 
-                query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
-                cursor.execute(query, statList)
+                    cnxn.commit()
+                    print("committed, trying to to add to ryanair_flights table")
+                    cursor.execute("USE flightDB", "")
+                    query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                    cursor.execute(query, statList)
+                    print("executed ok")
+                except:
+                    print("Trying to update airport table with new destination airport")
+                    cursor.execute("USE flightDB", "")
+                    cursor.execute(query, airportListDES)
+                    print("executed ok")
+
+                    cnxn.commit()
+                    print("committed, trying to to add to ryanair_flights table")
+                    cursor.execute("USE flightDB", "")
+                    query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                    cursor.execute(query, statList)
 
         # scraping link to next page using xpath -
         # this sometimes changes if the website changes
@@ -129,7 +145,8 @@ class FlightsSpider(scrapy.Spider):
         if linkNextPage.find('page-140') < 0:
             yield Request(linkNextPage, callback=self.parse)
 
-        # cnxn.commit()  # this commits changes to the database
+        cnxn.commit()  # this commits changes to the database
+        print("committed to DB")
 
 # https://ryanair.flight-status.info/page-112
 

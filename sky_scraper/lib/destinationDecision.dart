@@ -6,6 +6,12 @@ import 'dart:async';
 import 'package:mysql1/mysql1.dart';
 
 class DestinationRoute extends StatefulWidget {
+  final departing;
+  final climate;
+  final date;
+
+  DestinationRoute({Key key,this.departing,this.climate, this.date}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return new _DestDecisionRouteState();
@@ -27,10 +33,8 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
 
   @override
   StatefulWidget build(BuildContext context) {
-    //_airports = connectToDB();
-    var thisA;
     print("\n\n\nLENGTH: airports length: " + (_airports.length).toString());
-    //return MaterialApp(
+    print("Climate t/f? " + widget.climate.toString() + "\nDeparting: " + widget.departing + "\nDate: " + widget.date.toString());
     return Scaffold(
       appBar: AppBar(
         title: Text(""),
@@ -172,14 +176,12 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
     //query
     var results = await connection.query("select * from airports");
     for (var row in results) {
-      print(row);
       var city = row['city'].toString();
       var country = row['country'].toString();
 
       var airport = country + ", " + city;
-      print(airport);
+      //print(airport);
       if(row['code'] !=''){
-        print("Not none");
         _airports.add(airport);
       }
     }
