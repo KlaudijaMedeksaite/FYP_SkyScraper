@@ -23,6 +23,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS airports ("
                "code VARCHAR(255),"
                "city VARCHAR(255),"
                "country VARCHAR(255),"
+               "climate VARCHAR(255),"
                "PRIMARY KEY(code))")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS ryanair_flights ("
@@ -33,9 +34,9 @@ cursor.execute("CREATE TABLE IF NOT EXISTS ryanair_flights ("
                "destination VARCHAR(255),"
                "depart_terminal VARCHAR(255),"
                "arrive_terminal VARCHAR(255),"
-               "update_time VARCHAR(255),"
                "flight_status VARCHAR(255),"
                "tracking_status VARCHAR(255),"
+               "flight_date VARCHAR(255),"
                "PRIMARY KEY(flight_no),"
                "FOREIGN KEY(origin) REFERENCES airports(code),"
                "FOREIGN KEY(destination) REFERENCES airports(code))")

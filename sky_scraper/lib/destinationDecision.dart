@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sky_scraper/drop_list_1.dart';
 import 'decision2.dart';
 import 'dart:async';
 import 'package:mysql1/mysql1.dart';
 
 class DestinationRoute extends StatefulWidget {
+  //final Map<String, String>destinations;
   final departing;
   final climate;
   final date;
@@ -18,36 +18,38 @@ class DestinationRoute extends StatefulWidget {
   }
 
 }
-enum DropListChoice { climate, destination }
 
-int x = 10;
+  Map<String,String> destinations = Map<String,String>();
+
+// ignore: deprecated_member_use
+  List<String> climates = List<String>();
+  String optionSelected = "Select";
+
+  Map<String,String> _selectedDestinations = Map<String,String>();
+
 
 class _DestDecisionRouteState extends State<DestinationRoute> {
   // ignore: deprecated_member_use
+
   List<int> _selectedItems = List<int>();
-
-  // ignore: deprecated_member_use
-  List<String> _airports = List<String>();
-
-  //connectToDB();
 
   @override
   StatefulWidget build(BuildContext context) {
-    print("\n\n\nLENGTH: airports length: " + (_airports.length).toString());
+
+    //_selectedDestinations.clear();
+    var depDate = widget.date.day.toString() + "/" + widget.date.month.toString() + "/" + widget.date.year.toString();
     print("Climate t/f? " + widget.climate.toString() + "\nDeparting: " + widget.departing + "\nDate: " + widget.date.toString());
     return Scaffold(
       appBar: AppBar(
         title: Text(""),
       ),
-      //child: FutureBuilder
-      //future: connectToDB(),
       body: Center(
           child: SingleChildScrollView(
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   //SizedBox(height: 50),
-                  Text("Departing:",
+                  Text("Departing: " + widget.departing ,
                       style: GoogleFonts.oswald(
                         textStyle: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -56,26 +58,14 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
                         ),
                       )),
                   SizedBox(height: 30),
-                  Text("Choose Destination:",
-                      style: GoogleFonts.oswald(
-                        textStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          fontFamily: 'DancingScript',
-                        ),
-                      )),
-                  /*FutureBuilder(builder: ): */
-                  //Text('${buildDestinations()}'),
                   futureDB(),
-                  //SizedBox(height: 30),
-                  Text("Date of departure:",
+                  Text("Date of departure: " + depDate,
                       style: GoogleFonts.oswald(
                         textStyle: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
                         ),
                       )),
-                  //SizedBox(height: 15)
                 ]),
           )),
 
@@ -93,7 +83,7 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
             Navigator.pop(context);
           } else {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => Decision2Route()));
+                MaterialPageRoute(builder: (context) => Decision2Route(destinations:_selectedDestinations, date:widget.date, origin: widget.departing)));
           }
         },
       ),
@@ -103,68 +93,40 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
   futureDB() {
     Future<dynamic> database; //= connectToDB();
     database = connectToDB();
-    if(database == null){
-      setState((){database = connectToDB();});
-    }
+
     return Container(
-          height: 500,
-          child: database == null
-              ? Text('no db')
-              : FutureBuilder(
-              future: database,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  print("snapshot has data");
-                  return buildDestinations();
-                }
-                else if (snapshot.hasError) {
-                  print("snapshot has error");
-                  return Text("Database error: ${snapshot.error.toString()}");
-                }
-                else {
-                  print("snapshot loading?");
-                  return CircularProgressIndicator();
-                }
-              })
+        child: database == null
+            ? Text('no db')
+            : FutureBuilder(
+            future: database,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                print("snapshot has data");
+                return Column(
+                  children: [
+                    (widget.climate)
+                    ? buildClimates()
+                    : SizedBox(height: 1),
+                    buildDestinations()
+                  ],
+                );
+              }
+              else if (snapshot.hasError) {
+                print("snapshot has error");
+                return Text("Database error: ${snapshot.error.toString()}");
+              }
+              else {
+                print("snapshot loading?");
+                return CircularProgressIndicator();
+              }
+            })
     );
   }
-  buildDestinations() {
-    print("airports: " + _airports.length.toString());
-      return Container(
-        height: 500,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: _airports.length,
-          itemBuilder: (context, index) {
-            return Container(
 
-              color: (_selectedItems.contains(index)) ? Colors.green.withOpacity(
-                  0.5) : Colors.transparent,
-              child: ListTile(
-
-                trailing: _selectedItems.contains(index) ? Icon(Icons.check_box)
-                    : Icon(Icons.check_box_outline_blank),
-                onTap: () {
-                  if (_selectedItems.contains(index)) {
-                    setState(() {
-                      _selectedItems.removeWhere((val) => val == index);
-                    });
-                  }
-                  else {
-                    setState(() {
-                      _selectedItems.add(index);
-                    });
-                  }
-                },
-                title: Text('${_airports[index]}'),
-              ),
-            ); //ListTile(title: Text('$index'));
-          },
-        ),
-      );
-    }
   connectToDB() async {
-    _airports.clear();
+
+    destinations.clear();
+
     // connect
     final connection = await MySqlConnection.connect(new ConnectionSettings(
         host: '34.123.203.246',
@@ -173,22 +135,131 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
         password: '12345',
         db: 'flightDB'
     ));
-    //query
-    var results = await connection.query("select * from airports");
+    var results;
+    if(widget.climate == true){
+      climates.clear();
+      if (climates.length<1 && optionSelected == "Select"){
+        climates.add("Select");
+      }
+
+      //query for climates
+      results = await connection.query("select distinct climate from airports");
+
+      for (var row in results) {
+        if(row['climate'] != null){
+          climates.add(row['climate'].toString());
+        }
+      }
+    }
+
+    //query for countries with climate
+    if(widget.climate == true){
+      results = await connection.query("select * from airports where climate = '$optionSelected'");
+    } //if climate true
+    else{
+      results = await connection.query("select distinct rf.destination as code, a.city, a.country from ryanair_flights as rf left join airports as a on rf.destination=a.code where rf.origin = '${widget.departing}'");
+    }// climate not true
+
+    //print(results);
     for (var row in results) {
+      var code = row['code'].toString();
       var city = row['city'].toString();
       var country = row['country'].toString();
 
       var airport = country + ", " + city;
-      //print(airport);
-      if(row['code'] !=''){
-        _airports.add(airport);
+      print("AIRPORT: "+airport);
+      if (row['code'] != '') {
+        destinations.addAll({code:airport});
       }
     }
 
+    var sortedKeys = destinations.keys.toList()..sort();
     // close connection
     await connection.close();
-    return Future<dynamic>.delayed(Duration(seconds:0),() async => _airports);
+
+    return Future<dynamic>.delayed(Duration(seconds: 0), () async => climates);
   }
-}
+
+  buildClimates() {
+
+    return Column(
+      children: [
+        Text("Choose Climate:",
+            style: GoogleFonts.oswald(
+              textStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontFamily: 'DancingScript',
+              ),
+            )),
+        DropdownButton<String>(
+          value: optionSelected,
+          onChanged: (String newValue) {
+          setState(() {
+          optionSelected = newValue;
+
+          });
+          },
+          items: climates.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+          );
+          }).toList()
+          ),
+        SizedBox(height: 30),
+
+      ]
+          );
+  }
+
+  buildDestinations() {
+    return Column(
+        children: [
+          Text("Choose Destination:",
+              style: GoogleFonts.oswald(
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'DancingScript',
+                ),
+              )),
+          Container(
+            height: 300,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: destinations.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  color: (_selectedItems.contains(index)) ? Colors.green.withOpacity(
+                      0.5) : Colors.transparent,
+                  child: ListTile(
+                    trailing: _selectedItems.contains(index) ? Icon(Icons.check_box)
+                        : Icon(Icons.check_box_outline_blank),
+                    onTap: () {
+                      if (_selectedItems.contains(index)) {
+                        setState(() {
+                          _selectedItems.removeWhere((val) => val == index);
+                          _selectedDestinations.remove(index);
+                        });
+                      }
+                      else {
+                        setState(() {
+                          _selectedItems.add(index);
+                          print(index);
+                          _selectedDestinations.addAll({index.toString():destinations.values.elementAt(index)});
+                        });
+                      }
+                    },
+                    title: Text('${destinations.values.elementAt(index)}'),
+                  ),
+                );
+              },
+            ),
+          )
+        ]
+      ) ;
+
+    }
+  }
 

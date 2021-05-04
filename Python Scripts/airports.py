@@ -43,32 +43,26 @@ def updateAirports():
     count = 0
 
     # parsing list
-    with open('airports.txt') as airport_file:
+    with open('airports_db.txt') as airport_file:
         print("reading airports txt file")
         for line in airport_file:
+
             count = count + 1
-            try:
-                airportCode, country = line.split(',')
-            except:
-                airportCode, country, extra = line.split(',')
-                country = country + " " + extra
+            airportCode, country, city, climate = line.split(',', 3)
 
-            try:
-                airportCode, city = airportCode.split(')')
-            except:
-                airportCode, city, extra = airportCode.split(')')
-                city = city + " " + extra
+            airportCode = airportCode.strip()
+            country = country.strip()
+            city = city.strip()
+            climate = climate.strip()
 
-            airportCode = airportCode.replace('(', '')
-            country = country.replace('\n', '')
-            airportInfo = [airportCode, city, country]
+            print("\nCode: " + airportCode + "\nCountry: " + country +
+                  "\nCity: " + city + "\nClimate: " + climate)
 
-            print("\nAirport info: ")
-            print(airportInfo)
-            # for putting into db
+            airportInfo = [airportCode, country, city, climate]
+
             print("about to query")
             cursor.execute("USE flightDB", "")
-            query = "REPLACE INTO airports (code, city, country) VALUES (%s, %s, %s)"
+            query = "REPLACE INTO airports (code, country, city, climate) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, airportInfo)
             print("query exectuted " + str(count))
             print("committing to db")

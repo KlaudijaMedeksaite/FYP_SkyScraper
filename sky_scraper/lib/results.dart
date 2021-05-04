@@ -3,6 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'home.dart';
 
 class ResultsRoute extends StatefulWidget {
+
+  final flightOne;
+  final flightTwo;
+
+  ResultsRoute({Key key,this.flightOne,this.flightTwo}) : super(key: key);
+
+
   @override
   _ResultsRouteState createState() => _ResultsRouteState();
 }
@@ -12,7 +19,7 @@ class _ResultsRouteState extends State<ResultsRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Results"),
+        title: Text(""),
       ),
       body: Center(
         child: Column(
@@ -259,4 +266,67 @@ class _ResultsRouteState extends State<ResultsRoute> {
     );
   }
 
+  buildFlightTitles(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
+  buildFlightTimes(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
+  buildFlightTimeTrends(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
+  buildFlightDurations(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
+  buildFlightDurationTrends(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
+  buildFlightPercentages(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
+  buildFlightStatuses(){
+    return Row(
+      children: [
+        Text("flight one stats"),
+        Text("flight two stats"),
+
+      ],
+    );
+  }
 }

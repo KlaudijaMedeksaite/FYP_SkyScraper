@@ -10,22 +10,21 @@ class Decision1Route extends StatefulWidget {
     return new _Decision1RouteState();
   }
 }
-//enum DropListChoice {climate, destination}
-bool climate = false;
-// ignore: deprecated_member_use
-List<String> _airports = List<String>();
+bool _climate = false;
+
+//AIRPORTS
+Map<String,String> _airportMap = Map<String,String>();
+
 String optionSelected = "Select";
-
+String codeSelected = "0000";
 class _Decision1RouteState extends State<Decision1Route> {
-  DropListChoice dListChoice = DropListChoice.destination;
   DateTime selectedDate = DateTime.now();
-
 
   @override
   StatefulWidget build(BuildContext context) {
     print(optionSelected);
     print("LOADED");
-    print(_airports);
+    print(_airportMap.values);
     return Scaffold(
       appBar: AppBar(
         title: Text(""),
@@ -62,39 +61,31 @@ class _Decision1RouteState extends State<Decision1Route> {
                       title: const Text("Climate"),
                       value: true,
                       activeColor: Colors.lightGreenAccent,
-                      groupValue: climate,
+                      groupValue: _climate,
                       onChanged: (value) {
                         setState(() {
-                          print("climate = true");
-                          climate = value;
-                          //dListChoice = value;
-                          //print(dListChoice);
+                          print("_climate = true");
+                          _climate = value;
                         });
                       },
                     ),
                   RadioListTile(
                     title: Text("Destination"),
-                    //choice.toString().replaceAll("DropListChoice.", "")
-                    //   .replaceAll("c", "C")
-                    //  .replaceAll("d", "D")),
                     value: false,
-                    groupValue: climate,
+                    groupValue: _climate,
                     activeColor: Colors.lightGreenAccent,
-                    //groupValue: dListChoice,
                     onChanged: (value) {
                       setState(() {
-                        print("climate = false");
-                        climate = value;
-                        //dListChoice = value;
-                        //print(dListChoice);
+                        print("_climate = false");
+                        _climate = value;
                       });
                     },
                   ),
                   SizedBox(height: 50),
                   Text(
-                      "Date of departure:" + selectedDate.day.toString() + "/" +
+                      "Date of departure: " + selectedDate.day.toString() + "/" +
                           selectedDate.month.toString() + "/" +
-                          selectedDate.year.toString(),
+                          selectedDate.year.toString() ,
                       style: GoogleFonts.oswald(
                         textStyle: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -111,7 +102,7 @@ class _Decision1RouteState extends State<Decision1Route> {
                             fontStyle: FontStyle.italic,
                             fontSize: 20,
                           ),
-                        )
+                        ),
                     ),
                     padding: EdgeInsets.all(20.0),
                   ),
@@ -139,7 +130,7 @@ class _Decision1RouteState extends State<Decision1Route> {
           else {
             Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => DestinationRoute(departing: optionSelected, climate: climate ,date: selectedDate))
+                MaterialPageRoute(builder: (context) => DestinationRoute(departing: codeSelected, climate: _climate ,date: selectedDate))
             );
           }
         },
@@ -193,9 +184,10 @@ class _Decision1RouteState extends State<Decision1Route> {
 
   connectToDB() async {
 
-    _airports.clear();
-    if (_airports.length<1 && optionSelected == "Select"){
-      _airports.add(optionSelected);
+    _airportMap.clear();
+    //_airportCities.clear();
+    if (_airportMap.length<1 && optionSelected == "Select"){
+      _airportMap.addAll({codeSelected:optionSelected});
     }
     // connect
     final connection = await MySqlConnection.connect(new ConnectionSettings(
@@ -208,22 +200,25 @@ class _Decision1RouteState extends State<Decision1Route> {
     //query
     var results = await connection.query("select * from airports");
     for (var row in results) {
+      var code = row['code'].toString();
       var city = row['city'].toString();
       var country = row['country'].toString();
 
-      var airport = country + ", " + city;
+      var airport = city + ", " +country;
       //print(airport);
       if (row['code'] != '') {
-        _airports.add(airport);
+        _airportMap.addAll({code:airport});
+        //_airportCities.add(airport);
       }
     }
-    _airports.sort();
+    //_airportCities.sort();
+    var sortedKeys = _airportMap.keys.toList()..sort();
     // close connection
     await connection.close();
 
     print("number of airports");
-    print(_airports.length);
-    return Future<dynamic>.delayed(Duration(seconds: 0), () async => _airports);
+    print(_airportMap.length);
+    return Future<dynamic>.delayed(Duration(seconds: 0), () async => _airportMap);
   }
 
   buildDrop() {
@@ -231,11 +226,13 @@ class _Decision1RouteState extends State<Decision1Route> {
         value: optionSelected,
         onChanged: (String newValue) {
           setState(() {
-            print(optionSelected);
             optionSelected = newValue;
+            codeSelected = _airportMap.keys.firstWhere((k) =>(_airportMap[k]) == newValue);
+            print("code: " + codeSelected + ", city: " + optionSelected);
+
           });
         },
-        items: _airports.map<DropdownMenuItem<String>>((String value) {
+        items: _airportMap.values.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(value),

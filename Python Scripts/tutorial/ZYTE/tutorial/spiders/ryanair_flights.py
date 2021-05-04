@@ -1,6 +1,7 @@
 import scrapy
 import re
 import json
+from datetime import date
 from scrapy import Request
 from scrapy.crawler import CrawlerProcess
 import mysql.connector
@@ -93,11 +94,31 @@ class FlightsSpider(scrapy.Spider):
             terminalArr = terminalArr.replace('Arrival', '')
             terminalDep = terminalDep.replace('Departure', '')
 
+            # create flightDay var
+            flightDay = date.today().weekday()
+
+            if(flightDay == 0):
+                flightDay = "Monday"
+            elif(flightDay == 1):
+                flightDay = "Tuesday"
+            elif(flightDay == 2):
+                flightDay = "Wednesday"
+            elif(flightDay == 3):
+                flightDay = "Thursday"
+            elif(flightDay == 4):
+                flightDay = "Friday"
+            elif(flightDay == 5):
+                flightDay = "Saturday"
+            elif(flightDay == 6):
+                flightDay = "Sunday"
+
+            # needs to be changed, placeholder
+            tStat = "0"
             # put all vars into list, ready to go into db
             statList = [flightNo, departure, arrival, origin,
-                        destination, terminalDep, terminalArr, lastUpdate]
-            airportListOR = [origin, originAirportCity, originAirportCountry]
-            airportListDES = [destination, destAirportCity, destAirportCountry]
+                        destination, terminalDep, terminalArr, lastUpdate, tStat, flightDay]
+            airportListOR = [origin, originAirportCountry, originAirportCity]
+            airportListDES = [destination, destAirportCountry, destAirportCity]
             print(statList)
             rowNum += 1
 
@@ -105,7 +126,7 @@ class FlightsSpider(scrapy.Spider):
 
             try:
                 cursor.execute("USE flightDB", "")
-                query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status, tracking_status, flight_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
                 cursor.execute(query, statList)
             except:
                 print(Exception)
@@ -114,26 +135,28 @@ class FlightsSpider(scrapy.Spider):
                 try:
                     print("Trying to update airport table with new origin airport")
                     cursor.execute("USE flightDB", "")
-                    query = "REPLACE INTO airports (code, city, country) VALUES (%s, %s, %s)"
+                    query = "REPLACE INTO airports (code, country, city) VALUES (%s, %s, %s)"
                     cursor.execute(query, airportListOR)
                     print("executed ok")
 
                     cnxn.commit()
                     print("committed, trying to to add to ryanair_flights table")
                     cursor.execute("USE flightDB", "")
-                    query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                    print(statList)
+                    query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status, tracking_status, flight_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
                     cursor.execute(query, statList)
                     print("executed ok")
                 except:
                     print("Trying to update airport table with new destination airport")
                     cursor.execute("USE flightDB", "")
+                    query = "REPLACE INTO airports (code, country, city) VALUES (%s, %s, %s)"
                     cursor.execute(query, airportListDES)
                     print("executed ok")
 
                     cnxn.commit()
                     print("committed, trying to to add to ryanair_flights table")
                     cursor.execute("USE flightDB", "")
-                    query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                    query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status, tracking_status, flight_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
                     cursor.execute(query, statList)
 
         # scraping link to next page using xpath -
@@ -142,7 +165,7 @@ class FlightsSpider(scrapy.Spider):
         linkNextPage = response.xpath(
             '//*[@id="wrap-page"]/main/section[2]/div/div[1]/ul/li[8]/a/@href').get()
         linkNextPage = linkNextPage.strip()
-        if linkNextPage.find('page-140') < 0:
+        if linkNextPage.find('page-12') < 0:
             yield Request(linkNextPage, callback=self.parse)
 
         cnxn.commit()  # this commits changes to the database
