@@ -24,7 +24,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS airports ("
                "city VARCHAR(255),"
                "country VARCHAR(255),"
                "climate VARCHAR(255),"
-               "PRIMARY KEY(code))")
+               "PRIMARY KEY(code));")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS ryanair_flights ("
                "flight_no VARCHAR(255),"
@@ -39,7 +39,16 @@ cursor.execute("CREATE TABLE IF NOT EXISTS ryanair_flights ("
                "flight_date VARCHAR(255),"
                "PRIMARY KEY(flight_no),"
                "FOREIGN KEY(origin) REFERENCES airports(code),"
-               "FOREIGN KEY(destination) REFERENCES airports(code))")
+               "FOREIGN KEY(destination) REFERENCES airports(code));")
 
+cursor.execute("CREATE TABLE IF NOT EXISTS statistics ("
+               "flight_no VARCHAR(255),"
+               "counter VARCHAR(255),"
+               "cur_dur VARCHAR(255),"
+               "track_dur VARCHAR(255),"
+               "cur_stat VARCHAR(255),"
+               "track_stat VARCHAR(255),"
+               "PRIMARY KEY (flight_no),"
+               "FOREIGN KEY (flight_no) REFERENCES ryanair_flights(flight_no));")
 
 cnxn.commit()  # this commits changes to the database

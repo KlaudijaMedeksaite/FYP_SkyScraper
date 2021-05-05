@@ -52,7 +52,6 @@ class _Decision2RouteState extends State<Decision2Route> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-
                   printDestinations(),
                   printAirlines(),
                   futureDB(),
@@ -73,7 +72,7 @@ class _Decision2RouteState extends State<Decision2Route> {
             Navigator.pop(context);
           } else {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ResultsRoute()));
+                MaterialPageRoute(builder: (context) => ResultsRoute(flightOne: flightOne, flightTwo: flightTwo,)));
           }
         },
       ),
@@ -310,6 +309,13 @@ class _Decision2RouteState extends State<Decision2Route> {
                         setState(() {
                           _selectedItemsFs.removeWhere((val) => val == index);
                           limitCnt--;
+                          if(flightOne == _allFlights.keys.elementAt(index))
+                          {
+                            flightOne = "";
+                          }
+                          else{
+                            flightTwo = "";
+                          }
                         });
                       }
                       else {
@@ -317,6 +323,16 @@ class _Decision2RouteState extends State<Decision2Route> {
                         if(limitCnt<2){
                           setState(() {
                             _selectedItemsFs.add(index);
+                            if(flightOne == ""){
+                              print("empty f1");
+                              flightOne = _allFlights.keys.elementAt(index);
+                            }
+                            else{
+                              print("empty f2");
+                              flightTwo = _allFlights.keys.elementAt(index);
+                            }
+
+
                             print(index);
                             limitCnt++;
                           });
@@ -328,7 +344,24 @@ class _Decision2RouteState extends State<Decision2Route> {
                 );
               },
             ),
-          )
+          ),
+          Text("Flight one: $flightOne",
+              style: GoogleFonts.oswald(
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'DancingScript',
+                ),
+              )),
+          Text("Flight two: $flightTwo",
+              style: GoogleFonts.oswald(
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'DancingScript',
+                ),
+              )),
+
         ]
     ) ;
 

@@ -30,7 +30,6 @@ class DestinationRoute extends StatefulWidget {
 
 class _DestDecisionRouteState extends State<DestinationRoute> {
   // ignore: deprecated_member_use
-
   List<int> _selectedItems = List<int>();
 
   @override
@@ -154,21 +153,56 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
 
     //query for countries with climate
     if(widget.climate == true){
-      results = await connection.query("select * from airports where climate = '$optionSelected'");
+      String queryS = "select distinct rf.flight_no , rf.destination as code, a.city, a.country from ryanair_flights as rf left join airports as a on rf.destination=a.code where rf.origin = '${widget.departing}' and a.climate like '$optionSelected'";
+      //"select distinct rf.destination as code, a.city, a.country from ryanair_flights as rf left join airports as a on rf.destination=a.code where rf.origin = 'MAD' and a.climate like 'Tropical'";
+      results = await connection.query(queryS);
+      print(results);
     } //if climate true
     else{
-      results = await connection.query("select distinct rf.destination as code, a.city, a.country from ryanair_flights as rf left join airports as a on rf.destination=a.code where rf.origin = '${widget.departing}'");
+      results = await connection.query("select distinct rf.flight_no, rf.destination as code, a.city, a.country from ryanair_flights as rf left join airports as a on rf.destination=a.code where rf.origin = '${widget.departing}'");
     }// climate not true
 
+    String dayQ = "Select ";
+    String column = "";
+    int dayNo = widget.date.weekday;
+    switch(dayNo){
+      case 1:
+        column = "mon_fly";
+        break;
+      case 2:
+        column = "tue_fly";
+        break;
+      case 3:
+        column = "wed_fly";
+        break;
+      case 4:
+        column = "thu_fly";
+        break;
+      case 5:
+        column = "fri_fly";
+        break;
+      case 6:
+        column = "sat_fly";
+        break;
+      case 7:
+        column = "sun_fly";
+        break;
+    }
+    dayQ += column + " from fly_days where flight_no like '";
     //print(results);
     for (var row in results) {
+      var fno = row['flight_no'].toString();
       var code = row['code'].toString();
       var city = row['city'].toString();
       var country = row['country'].toString();
 
       var airport = country + ", " + city;
-      print("AIRPORT: "+airport);
-      if (row['code'] != '') {
+      String query = dayQ + fno + "'";
+      var results2 = await connection.query(query);
+      String flyBool = results2.first[column];
+
+      //print("AIRPORT: "+airport);
+      if (row['code'] != '' && flyBool == 'true') {
         destinations.addAll({code:airport});
       }
     }
@@ -240,7 +274,9 @@ class _DestDecisionRouteState extends State<DestinationRoute> {
                       if (_selectedItems.contains(index)) {
                         setState(() {
                           _selectedItems.removeWhere((val) => val == index);
-                          _selectedDestinations.remove(index);
+                          _selectedDestinations.remove(index.toString());
+                          print("selected destinations rn");
+                          print(_selectedDestinations);
                         });
                       }
                       else {

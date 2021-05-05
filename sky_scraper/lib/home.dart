@@ -12,7 +12,7 @@ class _HomeRouteState extends State<HomeRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sky Scanner",
+        title: Text("Sky Scraper",
           style: TextStyle(color: Color(0xffffffaa)),
         ),
       ),
