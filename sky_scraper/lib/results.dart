@@ -487,6 +487,7 @@ class _ResultsRouteState extends State<ResultsRoute> {
     var results = await connection.query("select track_stat from statistics where flight_no like '${widget.flightOne}' or flight_no like '${widget.flightTwo}';");
 
     print(results);
+    var newNum;
 
     onTimePerc1 = results.first['track_stat'];
     onTimePerc2 = results.last['track_stat'];
@@ -495,15 +496,24 @@ class _ResultsRouteState extends State<ResultsRoute> {
       onTimePerc1 = "100%";
     }
     else if (onTimePerc1.length > 2){
-      var newNum = onTimePerc1[0] + onTimePerc1[1];
+      if(onTimePerc1[1] == '.'){
+        newNum = onTimePerc1[0];
+      }
+      else{
+        newNum = onTimePerc1[0]+ onTimePerc1[1];
+      }
       onTimePerc1 = newNum.toString() + "%";
     }
-
     if(onTimePerc2 == "100.0"){
       onTimePerc2 = "100%";
     }
     else if (onTimePerc2.length > 2){
-      var newNum = onTimePerc2[0] + onTimePerc2[1];
+      if(onTimePerc2[1] == '.'){
+        newNum = onTimePerc2[0];
+      }
+      else{
+        newNum = onTimePerc2[0]+ onTimePerc2[1];
+      }
       onTimePerc2 = newNum.toString() + "%";
     }
 
@@ -529,6 +539,9 @@ class _ResultsRouteState extends State<ResultsRoute> {
 
     status1 = results.first['flight_status'];
     status2 = results.last['flight_status'];
+
+    status1 = status1.replaceAll('_', ' ');
+    status2 = status2.replaceAll('_', ' ');
 
     // close connection
     await connection.close();

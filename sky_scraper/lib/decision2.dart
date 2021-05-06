@@ -53,7 +53,7 @@ class _Decision2RouteState extends State<Decision2Route> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   printDestinations(),
-                  printAirlines(),
+                  //printAirlines(),
                   futureDB(),
                 ]),
           )),
