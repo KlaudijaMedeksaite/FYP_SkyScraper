@@ -31,6 +31,8 @@ To run the Flutter app from the Android studio:
 3. Navigate to where the cloned repository is on the pop up, you will see a little Android icon next to any Android projects
 4. Open the file with the Android symbol next to it
 5. To run it you can:
+
     a. Plug your Android device (which needs to be set to developer mode) in and press the green play button at the top to run the app.
+   
     b. Create a virtual device in Android Studio by clicking on the phone icon with the android symbol, pressing 'create virtual device'
        Then once it is created, you can press the new play button next to the virtual device to run the app.
