@@ -381,8 +381,20 @@ def flight_days(flightNo, day):
     elif 'Sunday' in day:
         column = 'sun_fly'
 
-    try:
-        #print("Trying to REPLACE into fly_days with: " +flightNo + " on column " + column)
+    cursor.execute("USE flightDB")
+    cursor.execute(
+        "select count(1) from fly_days where flight_no like '" + flightNo + "';")
+    results = cursor.fetchall()
+
+    if '1' in str(results):
+        existing = True
+    else:
+        existing = False
+
+    print(existing)
+    if existing == False:
+        print("Doesn't exist yet, Trying to REPLACE into fly_days with: " +
+              flightNo + " on column " + column)
         cursor.execute("USE flightDB")
         query = "REPLACE INTO fly_days (flight_no, " + \
             column + ") VALUES ('"+flightNo+"', 'true');"
@@ -390,8 +402,8 @@ def flight_days(flightNo, day):
         cursor.execute(query)
         # print("ok")
 
-    except:
-        print("Cant replace in fly_days. Updating..")
+    else:
+        print("Already exists, updating")
         print("Trying to UPDATE fly_days with: " +
               flightNo + " on column " + column)
 
