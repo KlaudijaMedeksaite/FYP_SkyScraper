@@ -1,4 +1,4 @@
-# Final Year project - Android app that uses a web scraper for flights
+# Final year project - Android app that uses a web scraper for flights
 
 This is an Android app, written in Dart and using the Flutter framework, that allows the user to select the destination and date they would like to travel, or select a climate and see destinations in that climate.
 Once this is selected it displays a list of flights from Ryanair that fit the criteria and would be a possible option for the user.
