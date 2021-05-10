@@ -148,8 +148,7 @@ class FlightsSpider(scrapy.Spider):
                         cursor.execute("USE flightDB", "")
                         # print(statList)
                         query = "REPLACE INTO ryanair_flights (flight_no, depart_time, arrive_time, origin, destination, depart_terminal, arrive_terminal, flight_status, flight_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) "
-                        cursor.exe
-                        cute(query, statList)
+                        cursor.execute(query, statList)
                         # print("executed ok")
                     except:
                         # print("Trying to update airport table with new destination airport")
